@@ -13,9 +13,9 @@
       "node12-linux-x64",
       "node12-macos-x64",
       "node12-win-x64",
-      "node12-linux-x32",
-      "node12-macos-x32",
-      "node12-win-x32"
+      "node12-linux-x86",
+      "node12-macos-x86",
+      "node12-win-x86"
     ],
     "outputPath": "build"
   },

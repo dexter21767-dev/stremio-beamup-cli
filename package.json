@@ -10,9 +10,12 @@
   },
   "pkg": {
     "targets": [
-      "node18-linux-x64",
-      "node18-macos-x64",
-      "node18-win-x64"
+      "node12-linux-x64",
+      "node12-macos-x64",
+      "node12-win-x64",
+      "node12-linux-x32",
+      "node12-macos-x32",
+      "node12-win-x32"
     ],
     "outputPath": "build"
   },

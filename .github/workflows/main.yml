@@ -19,12 +19,12 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install System Dependencies
+      - name: Install Build Tools
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential python2.7
 
-      - name: Set Up Node.js
+      - name: Set Up Node.js 14
         uses: actions/setup-node@v4
         with:
           node-version: 14
@@ -34,7 +34,7 @@ jobs:
 
       - name: Build Project
         run: npm run build
-
+        
   release:
     needs: build
     runs-on: ubuntu-latest

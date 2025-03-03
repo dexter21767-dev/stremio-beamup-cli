@@ -55,9 +55,17 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Get Package Version
+        id: get-version
+        
+        run: echo "pkg_version=$(jq -r .version package.json)" >> $GITHUB_ENV
+        shell: bash
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: v${{ env.pkg_version }}
+          name: Release v${{ env.pkg_version }}
           generate_release_notes: true
           draft: false
         env:

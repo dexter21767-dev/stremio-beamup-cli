@@ -48,10 +48,12 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Get Package Version
         id: get-version
         run: echo "pkg_version=$(jq -r .version package.json)" >> $GITHUB_ENV
-        shell: bash
 
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4

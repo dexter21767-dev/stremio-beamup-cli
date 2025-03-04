@@ -13,7 +13,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Cache System Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            /var/cache/apt/archives
+            /usr/local/bin/python
+          key: sys-deps-${{ hashFiles('.github/workflows/main.yml') }}
+          restore-keys: |
+            sys-deps-
+
       - name: Install Python 2.7
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y software-properties-common
@@ -23,13 +34,23 @@ jobs:
           sudo ln -s /usr/bin/python2.7 /usr/local/bin/python
 
       - name: Install Build Tools
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get install -y build-essential gcc g++ make
+
+      - name: Cache Node.js
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            node-
 
       - name: Set Up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 14
+          cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci

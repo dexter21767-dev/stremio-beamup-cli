@@ -1,14 +1,12 @@
-name: CI/CD Pipeline
+name: CI
 
 on:
-  push:
-    branches: [master]
   pull_request:
     branches: [master]
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Ubuntu 22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -20,9 +18,9 @@ jobs:
           path: |
             /var/cache/apt/archives
             /usr/bin/python3
-          key: sys-deps-py310-${{ hashFiles('.github/workflows/main.yml') }}
+          key: ci-sys-deps-${{ hashFiles('.github/workflows/ci.yml') }}
           restore-keys: |
-            sys-deps-py310-
+            ci-sys-deps-
 
       - name: Install Python 3.10
         if: steps.sys-cache.outputs.cache-hit != 'true'
@@ -43,9 +41,9 @@ jobs:
           path: |
             ~/.npm
             node_modules
-          key: node14-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: ci-node14-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            node14-${{ runner.os }}-
+            ci-node14-${{ runner.os }}-
 
       - name: Set Up Node.js 14
         uses: actions/setup-node@v4
@@ -60,38 +58,9 @@ jobs:
       - name: Build Project
         run: npm run build
 
-      - name: Upload Build Artifacts
+      - name: Upload PR Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: binaries
+          name: pr-binaries-${{ github.event.pull_request.number }}
           path: build/
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Get Package Version
-        id: get-version
-        run: echo "pkg_version=$(jq -r .version package.json)" >> $GITHUB_ENV
-
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: binaries
-          path: build/
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ env.pkg_version }}
-          name: Release v${{ env.pkg_version }}
-          generate_release_notes: true
-          draft: false
-          files: |
-            build/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          retention-days: 17

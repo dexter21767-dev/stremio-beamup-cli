@@ -1,38 +1,33 @@
-name: CI/CD Pipeline
+name: CD
 
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Cache System Dependencies
-        uses: actions/cache@v4  # 👈 Updated to v4
+        uses: actions/cache@v4
         id: sys-cache
         with:
           path: |
             /var/cache/apt/archives
-            /usr/local/bin/python
-          key: sys-deps-${{ hashFiles('.github/workflows/main.yml') }}
+            /usr/bin/python3
+          key: cd-sys-deps-${{ hashFiles('.github/workflows/cd.yml') }}
           restore-keys: |
-            sys-deps-
+            cd-sys-deps-
 
-      - name: Install Python 2.7
+      - name: Install Python 3.10
         if: steps.sys-cache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo add-apt-repository -y ppa:deadsnakes/ppa
-          sudo apt-get update
-          sudo apt-get install -y python2.7
-          sudo ln -s /usr/bin/python2.7 /usr/local/bin/python
+          sudo apt-get install -y python3.10 python3-pip
+          sudo ln -s /usr/bin/python3.10 /usr/local/bin/python3
 
       - name: Install Build Tools
         if: steps.sys-cache.outputs.cache-hit != 'true'
@@ -40,17 +35,17 @@ jobs:
           sudo apt-get install -y build-essential gcc g++ make
 
       - name: Cache Node Modules
-        uses: actions/cache@v4  # 👈 Updated to v4
+        uses: actions/cache@v4
         id: node-cache
         with:
           path: |
             ~/.npm
             node_modules
-          key: node-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: cd-node14-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            node-${{ runner.os }}-
+            cd-node14-${{ runner.os }}-
 
-      - name: Set Up Node.js
+      - name: Set Up Node.js 14
         uses: actions/setup-node@v4
         with:
           node-version: 14
@@ -60,28 +55,18 @@ jobs:
         if: steps.node-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Set Up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 14
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
       - name: Build Project
         run: npm run build
 
-      - name: Upload Build Artifacts
+      - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: binaries
+          name: release-binaries
           path: build/
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -90,10 +75,10 @@ jobs:
         id: get-version
         run: echo "pkg_version=$(jq -r .version package.json)" >> $GITHUB_ENV
 
-      - name: Download Build Artifacts
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: binaries
+          name: release-binaries
           path: build/
 
       - name: Create Release

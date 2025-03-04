@@ -12,7 +12,8 @@
     "targets": [
       "linux-x64",
       "macos-x64",
-      "win-x64"
+      "win-x64",
+      "win-x86"
     ],
     "outputPath": "build"
   },
@@ -31,7 +32,7 @@
   },
   "homepage": "https://github.com/Stremio/stremio-beamup-cli",
   "devDependencies": {
-    "pkg": "4.3.8"
+    "pkg": "4.5.1"
   },
   "dependencies": {
     "async-file": "2.0.2",

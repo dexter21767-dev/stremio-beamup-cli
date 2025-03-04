@@ -12,8 +12,7 @@
     "targets": [
       "linux-x64",
       "macos-x64",
-      "win-x64",
-      "win-x86"
+      "win-x64"
     ],
     "outputPath": "build"
   },

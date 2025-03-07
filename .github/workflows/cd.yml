@@ -53,10 +53,12 @@ jobs:
 
       - name: Install Dependencies
         if: steps.node-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: |
+          npm install -g pkg@4.5.1
+          npm ci
 
       - name: Build Project
-        run: npm run build -- --targets=node12-win-x86
+        run: pkg . --targets=node12-win-x86
 
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4

@@ -57,6 +57,10 @@ jobs:
           npm install -g pkg@4.5.1
           npm ci
 
+      - name: Install pkg
+        run: npm install -g pkg@4.5.1
+  
+
       - name: Build Project
         run: pkg . --targets=node12-win-x86
 
